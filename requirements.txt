@@ -1,0 +1,2 @@
+influxdb==5.2.2
+pyatmo==2.1.0
