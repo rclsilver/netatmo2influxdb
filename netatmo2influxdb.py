@@ -6,9 +6,9 @@ import sys
 import time
 
 from influxdb import InfluxDBClient
-from pyatmo import ClientAuth
+from pyatmo.auth import ClientAuth
+from pyatmo.weather_station import WeatherStationData
 from urllib.error import HTTPError
-from smart_home.WeatherStation import WeatherStationData
 
 def get_points(module):
     points = []
@@ -171,8 +171,8 @@ def main():
 
     try:
         auth = ClientAuth(
-            clientId=os.getenv('NETATMO_CLIENT_ID'),
-            clientSecret=os.getenv('NETATMO_CLIENT_SECRET'),
+            client_id=os.getenv('NETATMO_CLIENT_ID'),
+            client_secret=os.getenv('NETATMO_CLIENT_SECRET'),
             username=os.getenv('NETATMO_USERNAME'),
             password=os.getenv('NETATMO_PASSWORD'),
             scope='read_station',
