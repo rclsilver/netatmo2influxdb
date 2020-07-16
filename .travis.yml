@@ -22,7 +22,7 @@ install:
   - |
     docker build \
       --build-arg ARCH=${ARCH} \
-      -t ${IMAGE_NAME}-${ARCH}:v${IMAGE_VERSION} \
+      -t ${IMAGE_NAME}-${ARCH} \
       -f Dockerfile \
       .
 
