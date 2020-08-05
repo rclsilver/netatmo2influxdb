@@ -205,7 +205,7 @@ def main():
     while True:
         if not update(auth):
             logging.warning('Error while updating data')
-        time.sleep(os.getenv('LOOP_DELAY', 30))
+        time.sleep(int(os.getenv('LOOP_DELAY', 30)))
 
 if '__main__' == __name__:
     main()
