@@ -2,7 +2,7 @@ ARG ARCH
 
 FROM ${ARCH}/python:3.7-alpine
 
-ENV VERSION 1.1.0
+ENV VERSION 1.2.0
 
 COPY netatmo2influxdb.py /usr/local/bin/netatmo2influxdb
 COPY requirements.txt /tmp/requirements.txt

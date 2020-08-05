@@ -1,2 +1,2 @@
 influxdb==5.2.2
-pyatmo==4.0.0
+lnetatmo==1.6.0

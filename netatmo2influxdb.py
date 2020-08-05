@@ -6,65 +6,83 @@ import sys
 import time
 
 from influxdb import InfluxDBClient
-from pyatmo.auth import ClientAuth
-from pyatmo.weather_station import WeatherStationData
+from lnetatmo import ClientAuth, WeatherStationData
 from urllib.error import HTTPError
 
-def get_points(module):
+def get_points(station):
     points = []
 
-    if 'battery_vp' in module:
-        points.append({
-            'measurement': 'battery',
-            'tags': {
-                'id': module['_id'],
-                'label': module['module_name'],
-                'station': module['main_device'],
-            },
-            'fields': {
-                'value': module['battery_vp'],
-            }
-        })
+    if station['type'] != 'NAMain':
+        return points
 
-    if 'rf_status' in module:
-        points.append({
-            'measurement': 'rf_status',
-            'tags': {
-                'id': module['_id'],
-                'label': module['module_name'],
-                'station': module['main_device'],
-            },
-            'fields': {
-                'value': module['rf_status'],
-            }
-        })
-
-    if 'wifi_status' in module:
+    if 'wifi_status' in station:
         points.append({
             'measurement': 'wifi_status',
             'tags': {
-                'id': module['_id'],
-                'label': module['station_name'],
+                'id': station['_id'],
+                'label': station['station_name'],
             },
             'fields': {
-                'value': module['wifi_status'],
+                'value': station['wifi_status'],
             }
         })
 
-    if 'dashboard_data' in module:
-        for data_type in module['data_type']:
+    if 'dashboard_data' in station:
+        for data_type in station['data_type']:
             points.append({
                 'measurement': data_type.lower(),
                 'tags': {
-                    'id': module['_id'],
-                    'label': module['module_name'],
-                    'station': module['main_device'] if 'main_device' in module else module['_id'],
+                    'id': station['_id'],
+                    'label': station['module_name'],
+                    'station': station['_id'],
                 },
-                'time': module['dashboard_data']['time_utc'] * 1000000000, # need time in nano seconds
+                'time': station['dashboard_data']['time_utc'] * 1000000000, # need time in nano seconds
                 'fields': {
-                    'value': module['dashboard_data'][data_type] * 1.0,
+                    'value': station['dashboard_data'][data_type] * 1.0,
                 }
             })
+
+    for module in station['modules']:
+        if 'battery_vp' in module:
+            points.append({
+                'measurement': 'battery',
+                'tags': {
+                    'id': module['_id'],
+                    'label': module['module_name'],
+                    'station': station['_id'],
+                },
+                'fields': {
+                    'value': module['battery_vp'],
+                }
+            })
+
+        if 'rf_status' in module:
+            points.append({
+                'measurement': 'rf_status',
+                'tags': {
+                    'id': module['_id'],
+                    'label': module['module_name'],
+                    'station': station['_id'],
+                },
+                'fields': {
+                    'value': module['rf_status'],
+                }
+            })
+
+        if 'dashboard_data' in module:
+            for data_type in module['data_type']:
+                points.append({
+                    'measurement': data_type.lower(),
+                    'tags': {
+                        'id': module['_id'],
+                        'label': module['module_name'],
+                        'station': station['_id'],
+                    },
+                    'time': module['dashboard_data']['time_utc'] * 1000000000, # need time in nano seconds
+                    'fields': {
+                        'value': module['dashboard_data'][data_type] * 1.0,
+                    }
+                })
 
     return points
 
@@ -171,8 +189,8 @@ def main():
 
     try:
         auth = ClientAuth(
-            client_id=os.getenv('NETATMO_CLIENT_ID'),
-            client_secret=os.getenv('NETATMO_CLIENT_SECRET'),
+            clientId=os.getenv('NETATMO_CLIENT_ID'),
+            clientSecret=os.getenv('NETATMO_CLIENT_SECRET'),
             username=os.getenv('NETATMO_USERNAME'),
             password=os.getenv('NETATMO_PASSWORD'),
             scope='read_station',
